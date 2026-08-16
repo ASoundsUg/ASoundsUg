@@ -1,1 +1,46 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="ASounds song page"><title>Song — ASounds</title><link rel="stylesheet" href="style.css"></head><body><header class="site-header"><a class="brand" href="index.html"><span>A</span>Sounds</a><nav><a href="index.html#latest">Latest</a><a href="index.html#about">About</a></nav></header><main><section class="song-page"><a class="back" href="index.html#latest">← Back to songs</a><p class="eyebrow">ASOUNDS SONG PAGE</p><div id="song-content"></div></section></main><footer>© 2026 ASounds · Music discovery hub</footer><script>const songs=[{"title": "Nterede", "artist": "Pallaso", "genre": "Afrobeats", "url": "https://www.gandiwave.com/song/nterede-by-pallaso-89", "slug": "nterede-by-pallaso-89"}, {"title": "Mukyenda II", "artist": "Nandor Love", "genre": "Afrobeats", "url": "https://www.gandiwave.com/song/mukyenda-ii-by-nandor-love-26", "slug": "mukyenda-ii-by-nandor-love-26"}, {"title": "Kikette", "artist": "Fik Gaza", "genre": "Afrobeats", "url": "https://www.gandiwave.com/song/kikette-by-fik-gaza-16", "slug": "kikette-by-fik-gaza-16"}, {"title": "Tasobya", "artist": "GandiWave", "genre": "Ugandan Music", "url": "https://www.gandiwave.com/song/tasobya-8", "slug": "tasobya-8"}, {"title": "Sole Ne Sirato", "artist": "Temperature Touch", "genre": "Ugandan Music", "url": "https://www.gandiwave.com/song/sole-ne-sirato-by-temperature-touch-7", "slug": "sole-ne-sirato-by-temperature-touch-7"}, {"title": "Finally", "artist": "Spice Diana", "genre": "Ugandan Music", "url": "https://www.gandiwave.com/song/finally-by-spice-diana-4", "slug": "finally-by-spice-diana-4"}];const slug=new URLSearchParams(location.search).get("slug");const s=songs.find(x=>x.slug===slug);const c=document.getElementById("song-content");if(!s){c.innerHTML='<h1>Song not found</h1><p class="hero-text">This song is not available on ASounds yet.</p><a class="button" href="index.html">Back to ASounds</a>';}else{document.title=s.title+" by "+s.artist+" — ASounds";c.innerHTML=`<span class="tag">${s.genre}</span><h1>${s.title}</h1><h2 class="artist">${s.artist}</h2><p class="hero-text">Discover this song on ASounds, then continue to the official GandiWave page for the full song details and available options.</p><a class="button" href="${s.url}" target="_blank" rel="noopener">Visit Official Song Page</a><p class="destination">Official page: GandiWave</p>`;}</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" id="metaDescription" content="ASounds song page.">
+<title>Song — ASounds</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html"><b>A</b>Sounds</a><nav class="nav"><a href="index.html#latest">Latest</a><a href="index.html#about">About</a></nav></header>
+<main class="song-wrap">
+<a class="back" href="index.html#latest">← Back to latest releases</a>
+<div id="content"><p class="loading">Loading song…</p></div>
+</main>
+<footer>© 2026 ASounds</footer>
+<script>
+const ENDPOINT="PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const esc=s=>String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+const paras=s=>String(s||'').split(/\n\s*\n/).filter(Boolean).map(p=>`<p>${esc(p)}</p>`).join('');
+function youtubeHref(u){return /^https?:\/\//i.test(u||'')?u:''}
+async function load(){
+ const slug=new URLSearchParams(location.search).get('slug');
+ const c=document.getElementById('content');
+ if(!slug){c.innerHTML='<div class="not-found"><h1>Song not found</h1><a class="button" href="index.html">Back to ASounds</a></div>';return}
+ try{
+  const r=await fetch(ENDPOINT+'&slug='+encodeURIComponent(slug)); const x=await r.json();
+  if(!x.ok||!x.songs.length) throw new Error('not found');
+  const s=x.songs[0];
+  document.title=`${s.title} by ${s.artist} — ASounds`;
+  document.getElementById('metaDescription').setAttribute('content',(s.description||`${s.title} by ${s.artist}`).slice(0,160));
+  const date=s.createdAt?new Date(s.createdAt).toLocaleDateString(undefined,{year:'numeric',month:'long',day:'numeric'}):'';
+  const yt=youtubeHref(s.youtubeUrl);
+  c.innerHTML=`
+   <section class="song-top">
+    <img class="cover-large" src="${esc(s.coverUrl||'')}" alt="${esc(s.title)} cover art" onerror="this.src='';this.style.visibility='hidden'">
+    <div class="song-meta"><span class="tag">${esc(s.genre||'Music')}</span><h1>${esc(s.title)}</h1><p class="song-artist">by ${esc(s.artist)}</p>${date?`<p class="song-date">Added ${esc(date)}</p>`:''}</div>
+   </section>
+   <section class="description-block"><p class="eyebrow">ABOUT THE SONG</p><h2>Song description</h2><div class="long-description">${paras(s.description)}</div></section>
+   <section class="stream-box"><h2>Stream the song on music stores</h2><div class="stream-buttons">
+    <a class="stream-button" href="${esc(s.sourceUrl)}" target="_blank" rel="noopener noreferrer">GandiWave</a>
+    ${yt?`<a class="stream-button secondary" href="${esc(yt)}" target="_blank" rel="noopener noreferrer">YouTube</a>`:''}
+   </div></section>`;
+ }catch(e){c.innerHTML='<div class="not-found"><h1>Song not found</h1><p class="muted">This release may have been removed or is not available yet.</p><a class="button" href="index.html">Back to ASounds</a></div>'}
+}
+load();
+</script>
+</body></html>

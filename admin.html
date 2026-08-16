@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ASounds Admin — Add Release</title><link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html"><b>A</b>Sounds</a><span class="muted">Admin</span></header>
+<main class="admin-wrap">
+<p class="eyebrow">ASOUNDS ADMIN</p><h1>Add a music release</h1>
+<p class="muted">Add the information for a release. You can paste the song page URL and use <b>Fetch from URL</b> to try to retrieve the title, artist, genre, description, cover image and YouTube link. Everything remains editable before publishing.</p>
+<form id="form" class="admin-form">
+<div><label>Song page URL
+<div class="fetch-row"><input id="sourceUrl" type="url" required placeholder="https://www.gandiwave.com/song/..."><button id="fetchBtn" class="button ghost" type="button">Fetch from URL</button></div></label></div>
+<div id="preview" class="preview"><img id="previewImg" alt=""><div><b id="previewTitle"></b><div id="previewText" class="muted"></div></div></div>
+<div class="form-row"><label>Song title<input id="title" required></label><label>Artist<input id="artist" required></label></div>
+<div class="form-row"><label>Genre<input id="genre" placeholder="Afrobeats, Zouk, Amapiano…"></label><label>YouTube URL<input id="youtubeUrl" type="url" placeholder="https://www.youtube.com/watch?v=..."></label></div>
+<label>Cover image URL<input id="coverUrl" type="url" placeholder="Automatically retrieved from the song page when available"></label>
+<label>Long description<textarea id="description" rows="12" required placeholder="Write a natural, useful description of the song. You can use several paragraphs."></textarea></label>
+<label>Admin key<input id="key" type="password" required placeholder="Your private key"></label>
+<button class="button" type="submit">Publish release</button>
+<p id="status" class="status"></p>
+</form>
+</main>
+<script>
+const ENDPOINT="PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const $=id=>document.getElementById(id);
+const setStatus=t=>$('status').textContent=t;
+$('fetchBtn').addEventListener('click',async()=>{
+ const url=$('sourceUrl').value.trim(); if(!url){setStatus('Paste a song URL first.');return}
+ if(!ENDPOINT.startsWith('http')){setStatus('Add the Apps Script endpoint first.');return}
+ setStatus('Reading the song page…');
+ try{
+  const r=await fetch(ENDPOINT+'?action=preview&url='+encodeURIComponent(url)); const x=await r.json();
+  if(!x.ok) throw new Error(x.message||'Could not fetch metadata.');
+  $('title').value=x.title||$('title').value;$('artist').value=x.artist||$('artist').value;$('genre').value=x.genre||$('genre').value;
+  $('description').value=x.description||$('description').value;$('coverUrl').value=x.coverUrl||$('coverUrl').value;$('youtubeUrl').value=x.youtubeUrl||$('youtubeUrl').value;
+  if(x.coverUrl){$('previewImg').src=x.coverUrl;$('preview').classList.add('show')}
+  $('previewTitle').textContent=x.title||'Metadata found';$('previewText').textContent=x.artist||'';
+  setStatus('Metadata retrieved. Check and edit it, then publish.');
+ }catch(e){document.getElementById('status').textContent='Could not retrieve the page automatically. You can enter the details manually.'}
+});
+$('form').addEventListener('submit',async e=>{
+ e.preventDefault();
+ if(!ENDPOINT.startsWith('http')){setStatus('Add the Apps Script endpoint first.');return}
+ setStatus('Publishing…');
+ const payload={action:'addSong',key:$('key').value,title:$('title').value.trim(),artist:$('artist').value.trim(),genre:$('genre').value.trim(),description:$('description').value.trim(),sourceUrl:$('sourceUrl').value.trim(),youtubeUrl:$('youtubeUrl').value.trim(),coverUrl:$('coverUrl').value.trim()};
+ try{
+  const r=await fetch(ENDPOINT,{method:'POST',body:JSON.stringify(payload)});const x=await r.json();
+  if(!x.ok) throw new Error(x.message||'Could not publish.');
+  setStatus('Published successfully. The release will appear on ASounds.');
+  $('form').reset();$('preview').classList.remove('show');
+ }catch(err){setStatus(err.message||'Could not publish. Check your Apps Script deployment.')}
+});
+</script>
+</body></html>

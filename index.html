@@ -1,1 +1,46 @@
-<!doctype html><html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="ASounds — discover Ugandan songs and visit official music pages on GandiWave."><title>ASounds — Music Discovery Hub</title><link rel="stylesheet" href="style.css"></head><body><header class="site-header"><a class="brand" href="index.html"><span>A</span>Sounds</a><nav><a href="#latest">Latest</a><a href="#about">About</a></nav></header><main><section class="hero"><p class="eyebrow">YOUR MUSIC DISCOVERY HUB</p><h1>Discover the<br>sounds you've<br>been looking for.</h1><p class="hero-text">Explore songs and artists on ASounds, then visit the official music page on GandiWave for the full experience.</p><a class="button" href="#latest">Explore Songs</a></section><section id="latest" class="section"><p class="eyebrow">LATEST RELEASES</p><h2>Fresh sounds</h2><div id="song-list" class="song-grid"></div></section><section id="about" class="about section"><p class="eyebrow">ABOUT ASOUNDS</p><h2>A simple place to discover music.</h2><p>ASounds is an independent music discovery hub. Song information is presented here for discovery, while the full song pages are hosted on GandiWave.</p></section></main><footer>© 2026 ASounds · Music discovery hub</footer><script>const songs=[{"title": "Nterede", "artist": "Pallaso", "genre": "Afrobeats", "url": "https://www.gandiwave.com/song/nterede-by-pallaso-89", "slug": "nterede-by-pallaso-89"}, {"title": "Mukyenda II", "artist": "Nandor Love", "genre": "Afrobeats", "url": "https://www.gandiwave.com/song/mukyenda-ii-by-nandor-love-26", "slug": "mukyenda-ii-by-nandor-love-26"}, {"title": "Kikette", "artist": "Fik Gaza", "genre": "Afrobeats", "url": "https://www.gandiwave.com/song/kikette-by-fik-gaza-16", "slug": "kikette-by-fik-gaza-16"}, {"title": "Tasobya", "artist": "GandiWave", "genre": "Ugandan Music", "url": "https://www.gandiwave.com/song/tasobya-8", "slug": "tasobya-8"}, {"title": "Sole Ne Sirato", "artist": "Temperature Touch", "genre": "Ugandan Music", "url": "https://www.gandiwave.com/song/sole-ne-sirato-by-temperature-touch-7", "slug": "sole-ne-sirato-by-temperature-touch-7"}, {"title": "Finally", "artist": "Spice Diana", "genre": "Ugandan Music", "url": "https://www.gandiwave.com/song/finally-by-spice-diana-4", "slug": "finally-by-spice-diana-4"}];document.getElementById("song-list").innerHTML=songs.map((s,i)=>`<article class="song-card"><div class="number">${String(i+1).padStart(2,"0")}</div><div class="song-info"><span class="tag">${s.genre}</span><h3>${s.title}</h3><p>${s.artist}</p></div><a class="small-button" href="song.html?slug=${encodeURIComponent(s.slug)}">View song</a></article>`).join("");</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="ASounds — discover songs, artists and new music.">
+<title>ASounds — Discover Music</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="site-header"><a class="brand" href="index.html"><b>A</b>Sounds</a><nav class="nav"><a href="#latest">Latest</a><a href="#about">About</a></nav></header>
+<main class="wrap">
+<section class="hero">
+<p class="eyebrow">ASOUNDS</p>
+<h1>Discover the sounds you've been looking for.</h1>
+<p>Explore songs and artists, read the stories behind new releases, and find where each track can be streamed.</p>
+<a class="button" href="#latest">Explore songs</a>
+</section>
+<section id="latest" class="section">
+<div class="section-head"><div><p class="eyebrow">LATEST RELEASES</p><h2>Fresh music</h2></div></div>
+<div id="songs" class="song-grid"><p class="loading">Loading releases…</p></div>
+</section>
+<section id="about" class="section about">
+<p class="eyebrow">ABOUT ASOUNDS</p><h2>A place for music discovery.</h2>
+<p>ASounds is an independent music discovery hub built to give songs and artists their own space. Each release can have its own cover art, description and listening options, presented in a clean page designed for readers and music fans.</p>
+</section>
+</main>
+<footer>© 2026 ASounds</footer>
+<script>
+const ENDPOINT="PASTE_YOUR_APPS_SCRIPT_WEB_APP_URL_HERE";
+const fallback = [];
+const esc = s => String(s||'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+function card(s,i){return `<article class="song-card">
+<img class="cover-mini" src="${esc(s.coverUrl||'')}" alt="" onerror="this.style.visibility='hidden'">
+<div class="song-card-body"><span class="tag">${esc(s.genre||'Music')}</span><h3>${esc(s.title)}</h3><p>${esc(s.artist)}</p><a class="small-button" href="song.html?slug=${encodeURIComponent(s.slug)}">Open song</a></div></article>`}
+async function load(){
+ const box=document.getElementById('songs');
+ if(!ENDPOINT.startsWith('http')){box.innerHTML='<p class="muted">Add your Apps Script endpoint in index.html to load releases.</p>';return}
+ try{
+  const r=await fetch(ENDPOINT); const x=await r.json();
+  if(!x.ok) throw new Error(x.message);
+  box.innerHTML=x.songs.length?x.songs.map(card).join(''):'<p class="muted">No releases have been added yet.</p>';
+ }catch(e){box.innerHTML='<p class="muted">Releases are temporarily unavailable. Please try again later.</p>'}
+}
+load();
+</script>
+</body></html>
